@@ -6,7 +6,7 @@ Host alle media (foto's en filmpjes en geluidsfragmenten) in onderstaande struct
 De 369 ronde ondersteunt voor elke vraag ook media (foto, filmpje, geluid), wat de 369 ronde veel leuker maakt.  
   
 De gallerij ronde ondersteunt voor elk antwoord een foto (uiteraard) en ook een review foto (handig bij bvb. verborgen logo's').  
-Wees slim en geef elke foto de naam van het antwoord (spatie = underscore).  En elke review foto een achtervoegsel __review.
+Wees slim en geef elke foto de naam van het antwoord (spatie = underscore).  En elke review foto een achtervoegsel _review.
 Dit zal je sneller vooruit helpen in de designer.
 
 * /media
