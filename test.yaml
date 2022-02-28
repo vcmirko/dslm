@@ -1,5 +1,13 @@
-ho: true
-sdf: abc
-field1: "1"
-field2: "2"
-test: false
+original:
+  ho: true
+  sdf: abc
+  field1: "1"
+  field2: "2"
+  test: false
+name: testje
+new:
+  ho: true
+  sdf: testje
+  field1: "1"
+  field2: "2"
+  test: false
