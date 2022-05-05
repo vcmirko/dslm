@@ -151,7 +151,7 @@
     methods:{
       markAnswered(index){
         if(!this.play.question.finished){
-          this.$emit('checkAnswer',index,30)
+          this.$emit('checkAnswer',index,15)
         }
       },
       answeredPlayer(index){ return Helpers.getAnsweredPlayer(this.play,index)},
