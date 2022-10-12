@@ -1,5 +1,40 @@
 <template>
   <section class="section">
+    <div class="modal is-active" v-if="showQuestionImport">
+      <div class="modal-background" @click="showQuestionImport=false"></div>
+      <div class="modal-content">
+        <table class="table is-bordered is-striped">
+          <thead class="has-background-primary">
+            <tr>
+              <th class="has-text-white">Vraag</th>
+              <th class="has-text-white is-medium" title="Tags"><font-awesome-icon icon="tags" /></th>
+              <th class="has-text-white is-small" title="Media"><font-awesome-icon icon="image" /></th>
+              <th class="has-text-white is-small" title="Doe vraag"><font-awesome-icon icon="circle-dot" /></th>
+              <th class="has-text-white is-small" title="Gebruiker"><font-awesome-icon icon="user" /></th>
+            </tr>
+          </thead>
+          <thead>
+            <tr>
+              <th><BulmaInput icon="filter" v-model="filters.name" /></th>
+              <th><BulmaInput icon="filter" v-model="filters.tags" /></th>
+              <th><BulmaSwitch v-model="filters.media" type="is-info" label="" /></th>
+              <th><BulmaSwitch v-model="filters.do" type="is-info" label="" /></th>
+              <th><BulmaInput icon="filter" v-model="filters.name" /></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="q in onlineQuestionsFiltered" :key="q.id" class="is-clickable" @click="loadQuestion(q)">
+              <td class="ellipsis" :title="q.name">{{ q.name }}</td>
+              <td :title="q.tags" class="is-medium ellipsis">{{ q.tags }}</td>
+              <td class="is-small has-text-centered"><font-awesome-icon icon="check" class="has-text-success" v-if="q.media" /></td>
+              <td class="is-small has-text-centered"><font-awesome-icon icon="check" class="has-text-success" v-if="q.do" /></td>
+              <td class="is-medium ellipsis has-text-centered">{{ q.email }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="modal-close is-large" aria-label="close" @click="showQuestionImport=false"></button>
+    </div>
     <div class="container">
       <h1 class="title has-text-white"><font-awesome-icon icon="edit" /> Designer</h1>
       <!-- back to home -->
@@ -17,10 +52,11 @@
         <BulmaButton type="is-warning" icon="redo" label="Reset Quiz" @click="resetQuiz()" />
         <BulmaButton type="is-info" icon="file-export" label="Exporteer Quiz" @click="exportQuiz()" />
         <BulmaButton type="is-success" icon="save" label="Quiz opladen voor spel" @click="saveQuiz()" />
+        <BulmaButton type="is-link" icon="refresh" label="Herlaad online vragen" @click="loadOnlineQuestions()" />
         <!-- round nav -->
         <div class="tabs">
           <ul>
-            <li v-for="(round,index) in quiz.rounds" :key="'round'+index" :class="{'is-active':index==currentRound}"><a @click="currentRound=index;currentRoundType=round.type;focusQuestion=0">{{ round.name }}</a></li>
+            <li v-for="(round,index) in quiz.rounds" :key="'round'+index" :class="{'is-active':index==currentRound}"><a @click="currentRound=index;currentRoundType=round.type;focusQuestion=0;loadOnlineQuestions()">{{ round.name }}</a></li>
           </ul>
         </div>
         <!-- designer fields -->
@@ -126,8 +162,14 @@
               </div>
             </div>
             <div class="control mt-2">
-              <text-reader label="Importeer een vraag..." @load="questionraw = $event;importQuestion(index)"></text-reader>
+              <BulmaInput :placeholder="'Tags'" v-model="quiz.rounds[currentRound].questions[index].tags" icon="tags" :required="false" />
+              <BulmaInput :placeholder="'Help'" v-model="quiz.rounds[currentRound].questions[index].help" icon="circle-info" :required="false" />
+            </div>
+            <div class="control mt-2">
+              <!-- <text-reader label="Importeer een vraag..." @load="questionraw = $event;importQuestion(index)"></text-reader> -->
+              <BulmaButton icon="search" type="is-link" label="Zoek" @click="importQuestion2(index)" />
               <BulmaButton icon="floppy-disk" type="is-link" label="Vraag Opslaan" @click="currentQuestion=question;exportQuestion()" />
+              <BulmaButton icon="magic" type="is-link" label="Verras me" @click="importQuestionRandom(index)" />
             </div>
           </div>
           <BulmaButton v-if="currentRoundType=='finale'" type="is-success" @click="addFinalQuestion()" icon="plus" label="Vraag toevoegen" />
@@ -165,6 +207,7 @@
   import Vue from 'vue'
   import YAML from 'yaml'
   import VueCodeEditor from 'vue2-code-editor'
+  import axios from 'axios'
   import Helpers from './../lib/Helpers'
   import Media from './../components/Media.vue'
   import TextReader from "./../components/TextReader.vue"
@@ -181,6 +224,16 @@
       return  {
         quizraw:"",
         questionraw:"",
+        showQuestionImport:false,
+        filters:{
+          name:"",
+          tags:"",
+          media:false,
+          do:false,
+          email:""
+        },
+        onlineQuestions:[],
+        tkn:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1pcmtvQHZhbmNvbGVuLmNvbSIsImlhdCI6MTY2NTQ5ODkyOSwiZXhwIjoxOTI0Njk4OTI5fQ.NWE7gmWBO-McOr7AGeumdpz5tELljDw-s08sDzeenY8",
         quiz:{
           rounds: [
             {
@@ -971,15 +1024,29 @@
         currentRoundType:'369',
         previewMedia:false,
         currentQuestion:undefined,
+        currentQuestionIndex:0,
         currentQuestionType:undefined,
         isImportquiz:false,
         focusQuestion:-1,
         mediatype:undefined
       }
     },
+    computed:{
+      onlineQuestionsFiltered(){
+        return this.onlineQuestions.filter((x)=>{
+          if(this.filters.name && !x.name.toLowerCase().includes(this.filters.name.toLowerCase())) return false
+          if(this.filters.tags && !x.tags?.toLowerCase().includes(this.filters.tags.toLowerCase())) return false
+          if(this.filters.email && !x.email?.toLowerCase().includes(this.filters.email.toLowerCase())) return false
+          if(this.filters.media && !x.media) return false
+          if(this.filters.do && !x.do) return false
+          return true
+        })
+      }
+    },
     methods:{
       loadAll(){
         this.loadDslm()
+        this.loadOnlineQuestions()
       },
       loadDslm(){
         this.quiz = Helpers.loadQuiz()
@@ -1095,20 +1162,82 @@
       exportQuiz(){
         download("data:text/plain,"+encodeURIComponent(YAML.stringify(this.quiz)), "quiz.yaml", "text/plain");
       },
-      importQuestion(index){
-        var q
-        try{
-          q=YAML.parse(this.questionraw)
-        }catch(e){
-          this.$toast.error("Fout in het parsen van de vraag")
-          return false
-        }
-        Vue.set(this.quiz.rounds[this.currentRound].questions,index,q)
-        this.$toast.success("Vraag is geimporteerd")
+      // importQuestion(index){
+      //   var q
+      //   try{
+      //     q=YAML.parse(this.questionraw)
+      //   }catch(e){
+      //     this.$toast.error("Fout in het parsen van de vraag")
+      //     return false
+      //   }
+      //   Vue.set(this.quiz.rounds[this.currentRound].questions,index,q)
+      //   this.$toast.success("Vraag is geimporteerd")
+      // },
+      auth() {
+        return {
+          headers: { 'Authorization': 'Bearer ' + this.tkn }
+        };
+      },
+      loadOnlineQuestions(){
+        axios
+          .get("https://dslm.vancolen.com/api/v1/dslm?type="+this.currentRoundType,this.getAuth())
+          .then(response => {
+            if(response.data){
+              this.$toast.success("Online vragen zijn geladen")
+              this.onlineQuestions=response.data.vragen
+            }
+          })
+          .catch(err => {
+            this.$toast.error(err.response?.data?.messages.toString() || err.toString())
+          })
+      },
+      importQuestion2(index){
+        this.currentQuestionIndex=index
+        this.showQuestionImport=true
+        // this.loadOnlineQuestions()
+      },
+      importQuestionRandom(index){
+        this.currentQuestionIndex=index
+        var randomitem = this.onlineQuestions[Math.floor(Math.random()*this.onlineQuestions.length)];
+        this.loadQuestion(randomitem)
+      },
+      loadQuestion(q){
+        Vue.set(this.quiz.rounds[this.currentRound].questions,this.currentQuestionIndex,q)
+        this.showQuestionImport=false
+      },
+      getAuth() {
+        return {
+          headers: { 'Authorization': 'Bearer ' + this.tkn }
+        };
       },
       exportQuestion(){
-        var filename = Helpers.fileNameSafeYaml(this.currentQuestion.name,this.currentRoundType)
-        download("data:text/plain,"+encodeURIComponent(YAML.stringify(this.currentQuestion)), filename, "text/plain");
+        // var filename = Helpers.fileNameSafeYaml(this.currentQuestion.name,this.currentRoundType)
+        // download("data:text/plain,"+encodeURIComponent(YAML.stringify(this.currentQuestion)), filename, "text/plain");
+        this.currentQuestion.type=this.currentRoundType
+        if(this.currentQuestion.id){
+          axios
+            .put("https://dslm.vancolen.com/api/v1/dslm/"+this.currentQuestion.id,this.currentQuestion,this.getAuth())
+            .then(response => {
+              if(response.data.succes){
+                this.$toast.success("Aangepast")
+              }
+            })
+            .catch(err => {
+              this.$toast.error(err.response?.data?.messages.toString() || err.toString())
+            })
+        }else{
+          axios
+            .post("https://dslm.vancolen.com/api/v1/dslm",this.currentQuestion,this.getAuth())
+            .then(response => {
+              if(response.data.succes){
+                this.$toast.success("Opgeslagen")
+              }
+            })
+            .catch(err => {
+              this.$toast.error(err.response?.data?.messages.toString() || err.toString())
+            })
+        }
+
       },
       resetQuiz(){
         Object.assign(this.$data, this.$options.data());
@@ -1143,5 +1272,23 @@
     cursor:progress;
   }
   label.question{font-size:2rem!important;}
-
+  .table td,.table th{
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ellipsis{
+    text-overflow: ellipsis;
+  }
+  table  {
+    width:100%;
+  }
+  table thead th.is-small,table tbody td.is-small{
+    width:5em!important;
+    max-width:5em!important;
+  }
+  table thead th.is-medium,table tbody td.is-medium{
+    width:12em!important;
+    max-width:12em!important;
+  }
 </style>
