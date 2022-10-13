@@ -23,6 +23,12 @@
           <div class="box darkbg mt-2" v-if="!view">
              {{ question.name }}
           </div>
+          <p class="has-text-centered has-text-white mt-3" v-if="question.help">
+            <span class="icon-text">
+              <span class="icon is-size-3"><font-awesome-icon icon="circle-info" /></span>
+              <span class="is-size-4">{{ question.help}}</span>
+            </span>
+          </p>          
         </div>
       </div>
     </template>
