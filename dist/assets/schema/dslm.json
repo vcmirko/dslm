@@ -59,7 +59,7 @@
 							"required": [
 								"name"
 							],
-              "additionalProperties": false,
+              "additionalProperties": true,
  						  "properties": {
 								"name": {
 									"$ref": "/name"
@@ -69,6 +69,15 @@
 									"title": "Do",
 									"type": "boolean",
 									"default": false
+								},
+								"tags":{
+									"type": "string"
+								},
+								"type":{
+									"type": "string"
+								},
+								"help":{
+									"type": "string"
 								},
 								"answer": {
 									"$ref": "/name"

@@ -177,8 +177,9 @@ export default {
       if (this.play.players.length == 3) {
         this.play.players.push({
           name: "",
-          score: 60
+          score: 0
         })
+        Vue.set(this.play.players[3],'score',0)
       } else {
         this.play.players.pop()
       }

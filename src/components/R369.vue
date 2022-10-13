@@ -15,6 +15,12 @@
             <span class="is-size-4">{{ question.answer}}</span>
           </span>
         </p>
+        <p class="has-text-centered has-text-white mt-3" v-if="question.help">
+          <span class="icon-text">
+            <span class="icon is-size-3"><font-awesome-icon icon="circle-info" /></span>
+            <span class="is-size-4">{{ question.help}}</span>
+          </span>
+        </p>
         <p class="has-text-centered mt-3" v-if="question.media">
           <template>
             <Keypress key-event="keydown" name="space" :preventDefault="true" :key-code="13" @success="$emit('showMedia')" />

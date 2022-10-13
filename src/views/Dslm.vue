@@ -1,6 +1,6 @@
 <template>
   <div>
-    <fullscreen v-model="fullscreen" v-if="isLoaded && !showChangeScore">
+    <fullscreen v-model="fullscreen" v-if="isLoaded && !showChangeScore && !showChangeName">
 
       <div :class="{'has-background-dslm':view && fullscreen}">
         <section class="dslm section">
@@ -64,6 +64,9 @@
             <a class="navbar-item" v-if="!view" @click="showChangeScore=true">
               <span class="icon"><font-awesome-icon icon="undo-alt" /></span><span>Scores</span>
             </a>
+            <a class="navbar-item" v-if="!view" @click="showChangeName=true">
+              <span class="icon"><font-awesome-icon icon="user" /></span><span>Gebruikers</span>
+            </a>
             <router-link v-if="!view" class="navbar-item" to="/view" target="_blank">
               <span class="icon"><font-awesome-icon icon="eye" /></span><span>Deelnemers scherm</span>
             </router-link>
@@ -101,6 +104,22 @@
         </div>
       </div>
     </div>
+    <div v-if="isLoaded && showChangeName">
+      <div class="box darkbg has-text-centered">
+        <div class="notification is-warning is-inline-block" width="400px">
+          <h2 class="is-family-secondary is-size-3 mb-2">Namen</h2>
+          <div class="field" v-for="player,index in play.players" :key="'player'+index">
+            <label class="label">Speler {{(index+1)}}</label>
+            <p class="control">
+              <input class="input" type="text" @change="savePlay()" v-model.number="play.players[index].name">
+            </p>
+          </div>
+          <button class="button is-success mt-5" @click="showChangeName=false">
+            <span class="icon"><font-awesome-icon icon="times" /></span><span>Close</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -131,7 +150,8 @@
         clock:undefined,
         fullscreen: false,
         clockAudio:undefined,
-        showChangeScore:false
+        showChangeScore:false,
+        showChangeName:false
       }
     },
     computed: {
