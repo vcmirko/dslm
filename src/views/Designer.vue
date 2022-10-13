@@ -101,6 +101,7 @@
               <label class="label question">Vraag {{ (index+1) }}
                 <BulmaButton type="has-text-success" icon="arrow-down" iconOnly @click.stop="move(index,1)" />
                 <BulmaButton type="has-text-primary" icon="arrow-up" iconOnly @click.stop="move(index,-1)" />
+                <BulmaButton type="has-text-info" icon="redo" iconOnly @click.stop="resetQuestion(index)" />
                 <BulmaButton v-if="currentRoundType=='finale'" type="has-text-danger ml-5" icon="times" iconOnly @click="removeFinalQuestion(index)" />
                 <BulmaButton v-if="currentRoundType=='finale'" type="has-text-success" icon="plus" iconOnly @click="addFinalQuestion(index)" />
               </label>
@@ -284,51 +285,63 @@
               questions: [
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 },
                 {
                   name: "",
-                  answer: ""
+                  answer: "",
+                  tags:""
                 }
               ]
             },
@@ -339,6 +352,7 @@
               questions: [
                 {
                   name: "",
+                  tags:"",
                   preview: "/media/opendeur/vraag1.jpg",
                   media: "",
                   answers: [
@@ -358,6 +372,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   preview: "/media/opendeur/vraag2.jpg",
                   media: "",
                   answers: [
@@ -377,6 +392,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   preview: "/media/opendeur/vraag3.jpg",
                   media: "",
                   answers: [
@@ -396,6 +412,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   preview: "/media/opendeur/vraag4.jpg",
                   media: "",
                   answers: [
@@ -417,6 +434,7 @@
             },
             {
               name: "Puzzel",
+              tags:"",
               type: "puzzel",
               description: "Er moeten 3 verbanden worden gezochten tussen de termen die je zo meteen ziet verschijnen, soms moeilijk, maar het goeie nieuws: elk juist antwoord levert 30 seconden op.",
               questions: [
@@ -450,6 +468,7 @@
                 },
                 {
                   name: "Puzzel2",
+                  tags:"",
                   words: {
                     w11: "",
                     w12: "",
@@ -478,6 +497,7 @@
                 },
                 {
                   name: "Puzzel3",
+                  tags:"",
                   words: {
                     w11: "",
                     w12: "",
@@ -506,6 +526,7 @@
                 },
                 {
                   name: "Puzzel4",
+                  tags:"",
                   words: {
                     w11: "",
                     w12: "",
@@ -536,6 +557,7 @@
             },
             {
               name: "Gallerij",
+              tags:"",
               type: "gallerij",
               description: "In deze ronde zien we een marathon aan foto’s voorbij flitsen en de opdracht is simpel: zeggen wie of wat je ziet. Elk juist antwoord levert 15 seconden op.",
               questions: [
@@ -586,6 +608,7 @@
                 },
                 {
                   name: "Gallerij2",
+                  tags:"",
                   answers: [
                     {
                       media: "",
@@ -631,6 +654,7 @@
                 },
                 {
                   name: "Gallerij3",
+                  tags:"",
                   answers: [
                     {
                       media: "",
@@ -676,6 +700,7 @@
                 },
                 {
                   name: "Gallerij4",
+                  tags:"",
                   answers: [
                     {
                       media: "",
@@ -728,6 +753,7 @@
               questions: [
                 {
                   name: "",
+                  tags:"",
                   media: "",
                   answers: [
                     {
@@ -749,6 +775,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   media: "",
                   answers: [
                     {
@@ -770,6 +797,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   media: "",
                   answers: [
                     {
@@ -791,6 +819,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   media: "",
                   answers: [
                     {
@@ -819,6 +848,7 @@
               questions: [
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -839,6 +869,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -859,6 +890,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -879,6 +911,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -899,6 +932,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -919,6 +953,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -939,6 +974,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -959,6 +995,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -979,6 +1016,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -999,6 +1037,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -1019,6 +1058,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -1039,6 +1079,7 @@
                 },
                 {
                   name: "",
+                  tags:"",
                   answers: [
                     {
                       name: ""
@@ -1338,6 +1379,9 @@
         Object.assign(this.$data, this.$options.data());
         this.loadToken()
         this.loadOnlineQuestions(true)
+      },
+      resetQuestion(index){
+        Vue.set(this.quiz.rounds[this.currentRound].questions,index,this.$options.data().quiz.rounds[this.currentRound].questions[0]);
       },
       saveQuiz() {
        var validation = Helpers.validateQuiz(this.quiz)

@@ -35,15 +35,18 @@
     props: ['value','autoComplete'],
     data () {
       return {
-        tags:[],
         tag:"",
         itemFocus:undefined,
         forceDrop:false
       }
     },
     watch: {
-      value: function (val) {
-        if(val) this.tags=val.split(',')
+      value: function () {
+          if(this.value?.length>0)
+            this.tags=(this.value?.split(',')) || []
+          else {
+            this.tags = []
+          }
       }
     },
     computed: {
@@ -51,7 +54,15 @@
         return (this.autoComplete || []).filter(x => ((this.tag && x.includes(this.tag))||(this.forceDrop && !this.tag)) && !this.tags.includes(x))
       },
       exists(){
-        return this.tags.some(x => x==this.tag)
+        return (this.tags?.some(x => x==this.tag)) || false
+      },
+      tags: {
+        get() {
+          return (this.value?.length>0)?(this.value?.split(',')||[]):[]
+        },
+        set() {
+          this.$emit('input', this.tags.join(","))
+        }
       }
     },
     methods:{
