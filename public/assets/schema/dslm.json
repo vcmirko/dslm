@@ -5,10 +5,19 @@
 	"title": "Root",
 	"type": "object",
 	"required": [
+		"name",
 		"rounds"
 	],
-  "additionalProperties": false,
+  "additionalProperties": true,
 	"properties": {
+		"name": {
+			"type": "string",
+			"pattern": "^.*$"
+		},
+		"tags": {
+			"type": "string",
+			"pattern": "^.*$"
+		},
 		"rounds": {
 			"$id": "#root/rounds",
 			"title": "Rounds",

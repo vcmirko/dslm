@@ -21,8 +21,6 @@
              <BulmaButton @click="showTokenQuestion=false" label="Annuleren" type="is-danger" icon="cancel" />
            </footer>
          </div>
-
-
       </div>
       <button class="modal-close is-large" aria-label="close" @click="showTokenQuestion=false"></button>
     </div>
@@ -42,14 +40,14 @@
           <thead>
             <tr>
               <th><BulmaInput icon="filter" v-model="filters.name" /></th>
-              <th><BulmaInput icon="filter" v-model="filters.tags" /></th>
-              <th><BulmaSwitch v-model="filters.media" type="is-info" label="" /></th>
-              <th><BulmaSwitch v-model="filters.do" type="is-info" label="" /></th>
-              <th><BulmaInput icon="filter" v-model="filters.name" /></th>
+              <th class="is-medium"><BulmaInput icon="filter" v-model="filters.tags" /></th>
+              <th class="is-small"><BulmaSwitch v-model="filters.media" type="is-info" label="" /></th>
+              <th class="is-small"><BulmaSwitch v-model="filters.do" type="is-info" label="" /></th>
+              <th class="is-medium"><BulmaInput icon="filter" v-model="filters.email" /></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="q in onlineQuestionsFiltered" :key="q.id" class="is-clickable" @click="loadQuestion(q)">
+            <tr v-for="q in onlineQuestionsFiltered" :key="q.id" class="is-clickable" @click="loadOnlineQuestion(q)">
               <td class="ellipsis" :title="q.name">{{ q.name }}</td>
               <td :title="q.tags" class="is-medium ellipsis">{{ q.tags }}</td>
               <td class="is-small has-text-centered"><font-awesome-icon icon="check" class="has-text-success" v-if="q.media" /></td>
@@ -61,6 +59,35 @@
       </div>
       <button class="modal-close is-large" aria-label="close" @click="showQuestionImport=false"></button>
     </div>
+    <div class="modal is-active" v-if="showQuizImport">
+      <div class="modal-background" @click="showQuizImport=false"></div>
+      <div class="modal-content">
+        <table class="table is-bordered is-striped">
+          <thead class="has-background-primary">
+            <tr>
+              <th class="has-text-white">Quiz</th>
+              <th class="has-text-white is-medium" title="Tags"><font-awesome-icon icon="tags" /></th>
+              <th class="has-text-white is-medium" title="Gebruiker"><font-awesome-icon icon="user" /></th>
+            </tr>
+          </thead>
+          <thead>
+            <tr>
+              <th><BulmaInput icon="filter" v-model="filters.name" /></th>
+              <th class="is-medium"><BulmaInput icon="filter" v-model="filters.tags" /></th>
+              <th class="is-medium"><BulmaInput icon="filter" v-model="filters.email" /></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="q in onlineQuizFiltered" :key="q.id" class="is-clickable" @click="loadOnlineQuiz(q)">
+              <td class="ellipsis" :title="q.name">{{ q.name }}</td>
+              <td :title="q.tags" class="is-medium ellipsis">{{ q.tags }}</td>
+              <td class="is-medium ellipsis has-text-centered">{{ q.email }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="modal-close is-large" aria-label="close" @click="showQuizImport=false"></button>
+    </div>
     <div class="container">
       <h1 class="title has-text-white"><font-awesome-icon icon="edit" /> Designer</h1>
       <!-- back to home -->
@@ -68,18 +95,29 @@
         <span class="icon"><font-awesome-icon icon="home" /></span><span>Home</span>
       </router-link>
       <!-- top links -->
-      <BulmaButton v-if="!isImportquiz" @click="isImportquiz=true;quizraw=''" icon="file-import" label="Import Quiz" />
+      <BulmaButton v-if="!isImportquiz" @click="isImportquiz=true;quizraw=''" icon="file-import" label="Import" />
+      <BulmaButton v-if="!isImportquiz && tkn" @click="showQuizImport=true;loadOnlineQuizes()" icon="download" label="Load" />
+      <BulmaButton v-if="!isImportquiz" type="is-link" icon="fingerprint" label="Wijzig token" @click="showTokenQuestion=true" />
       <BulmaButton v-if="isImportquiz" @click="isImportquiz=false;" type="is-danger" icon="times" label="Terug naar designer" />
       <!-- designer -->
       <div v-if="quiz && !isImportquiz" class="box has-background-white">
         <!-- media preview -->
         <MediaPreview :currentQuestion="currentQuestion" :type="mediatype" v-if="previewMedia" @close="previewMedia=false" />
         <!-- quiz buttons -->
-        <BulmaButton type="is-warning" icon="redo" label="Reset Quiz" @click="resetQuiz()" />
-        <BulmaButton type="is-info" icon="file-export" label="Exporteer Quiz" @click="exportQuiz()" />
-        <BulmaButton type="is-success" icon="save" label="Quiz opladen voor spel" @click="saveQuiz()" />
+        <div class="field">
+          <BulmaInput icon="star" placeholder="Quiz naam" v-model="quiz.name" :required="true" />
+        </div>
+        <div class="field">
+          <BulmaTags
+            :autoComplete="[]"
+            v-model="quiz.tags"
+          />
+        </div>
+        <BulmaButton type="is-warning" icon="redo" label="Reset" @click="resetQuiz()" />
+        <BulmaButton type="is-info" icon="upload" v-if="quiz.name && tkn" label="Export" @click="exportOnlineQuiz()" />
+        <BulmaButton type="is-info" icon="file-export" v-if="quiz.name && !tkn" label="Export" @click="exportQuiz()" />
+        <BulmaButton type="is-success" icon="save" label="Opladen voor spel" @click="saveQuiz()" />
         <BulmaButton type="is-link" icon="refresh" v-if="tkn" label="Herlaad online vragen" @click="loadOnlineQuestions()" />
-        <BulmaButton type="is-link" icon="fingerprint" label="Wijzig token" @click="showTokenQuestion=true" />
         <BulmaButton type="is-link" icon="magic" v-if="tkn" label="Random Ronde" @click="importRoundRandom" />
         <!-- round nav -->
         <div class="tabs">
@@ -205,7 +243,7 @@
               </div>
               <div class="control mt-2">
                 <!-- <text-reader label="Importeer een vraag..." @load="questionraw = $event;importQuestion(index)"></text-reader> -->
-                <BulmaButton icon="search" type="is-link" label="Zoek" @click="importQuestion2(index)" />
+                <BulmaButton icon="search" type="is-link" label="Zoek" @click="importQuestion(index)" />
                 <BulmaButton icon="floppy-disk" type="is-link" label="Vraag Opslaan" @click="currentQuestion=question;exportQuestion()" />
                 <BulmaButton icon="magic" type="is-link" label="Verras me" @click="importQuestionRandom(index)" />
               </div>
@@ -266,6 +304,7 @@
         questionraw:"",
         newTags:undefined,
         showQuestionImport:false,
+        showQuizImport:false,
         showTokenQuestion:false,
         filters:{
           name:"",
@@ -275,8 +314,10 @@
           email:""
         },
         onlineQuestions:[],
+        onlineQuizes:[],
         tkn:"",
         quiz:{
+          name: "",
           rounds: [
             {
               name: "3-6-9",
@@ -1124,6 +1165,13 @@
           return true
         })
       },
+      onlineQuizFiltered(){
+        return this.onlineQuizes.filter((x)=>{
+          if(this.filters.name && !x.name.toLowerCase().includes(this.filters.name.toLowerCase())) return false
+          if(this.filters.email && !x.email?.toLowerCase().includes(this.filters.email.toLowerCase())) return false
+          return true
+        })
+      },
       tags(){
           return this.onlineQuestions.reduce(
             (prev,cur)=>{
@@ -1301,7 +1349,21 @@
               this.$toast.error(err.response?.data?.messages.toString() || err.toString())
             })
       },
-      importQuestion2(index){
+      loadOnlineQuizes(noAlert){
+        if(this.tkn)
+          axios
+            .get("https://dslm.vancolen.com/api/v1/dslm?type=quiz",this.getAuth())
+            .then(response => {
+              if(response.data){
+                if(!noAlert) this.$toast.success("Online quizes zijn geladen")
+                this.onlineQuizes=response.data.vragen
+              }
+            })
+            .catch(err => {
+              this.$toast.error(err.response?.data?.messages.toString() || err.toString())
+            })
+      },
+      importQuestion(index){
         this.currentQuestionIndex=index
         this.showQuestionImport=true
         // this.loadOnlineQuestions()
@@ -1309,7 +1371,7 @@
       importQuestionRandom(index){
         this.currentQuestionIndex=index
         var randomitem = this.onlineQuestions[Math.floor(Math.random()*this.onlineQuestions.length)];
-        this.loadQuestion(randomitem)
+        this.loadOnlineQuestion(randomitem)
       },
       importRoundRandom(){
         var tempIndex = this.currentQuestionIndex
@@ -1319,34 +1381,20 @@
         this.currentQuestionIndex=tempIndex
 
       },
-      loadQuestion(q){
+      loadOnlineQuestion(q){
         Vue.set(this.quiz.rounds[this.currentRound].questions,this.currentQuestionIndex,JSON.parse(JSON.stringify(q)))
         this.showQuestionImport=false
+      },
+      loadOnlineQuiz(q){
+        Vue.set(this,'quiz',JSON.parse(JSON.stringify(q)))
+        this.showQuizImport=false
       },
       getAuth() {
         return {
           headers: { 'Authorization': 'Bearer ' + this.tkn }
         };
       },
-      // hasMedia(index){
-      //   const media = this.quiz.rounds[this.currentRound]?.questions[index]?.media
-      //   return media && Helpers.mediaExists(media)
-      // },
-      // hasMediaPreview(index){
-      //   const media = this.quiz.rounds[this.currentRound]?.questions[index]?.preview
-      //   return media && Helpers.mediaExists(media)
-      // },
-      // hasMediaGallery(index,index2){
-      //   const media = this.quiz.rounds[this.currentRound]?.questions[index]?.answers[index2]?.media
-      //   return media && Helpers.mediaExists(media)
-      // },
-      // hasMediaReview(index,index2){
-      //   const media = this.quiz.rounds[this.currentRound]?.questions[index]?.answers[index2]?.review
-      //   return media && Helpers.mediaExists(media)
-      // },
       exportQuestion(){
-        // var filename = Helpers.fileNameSafeYaml(this.currentQuestion.name,this.currentRoundType)
-        // download("data:text/plain,"+encodeURIComponent(YAML.stringify(this.currentQuestion)), filename, "text/plain");
         this.currentQuestion.type=this.currentRoundType
         if(this.currentQuestion.id){
           axios
@@ -1373,7 +1421,34 @@
               this.$toast.error(err.response?.data?.messages.toString() || err.toString())
             })
         }
-
+      },
+      exportOnlineQuiz(){
+        Vue.set(this.quiz,"type","quiz")
+        if(this.quiz?.id){
+          axios
+            .put("https://dslm.vancolen.com/api/v1/dslm/"+this.quiz.id,this.currentQuestion,this.getAuth())
+            .then(response => {
+              if(response.data.succes){
+                this.$toast.success("Aangepast")
+                this.loadOnlineQuizes(true)
+              }
+            })
+            .catch(err => {
+              this.$toast.error(err.response?.data?.messages.toString() || err.toString())
+            })
+        }else{
+          axios
+            .post("https://dslm.vancolen.com/api/v1/dslm",this.quiz,this.getAuth())
+            .then(response => {
+              if(response.data.succes){
+                this.$toast.success("Opgeslagen")
+                this.loadOnlineQuizes(true)
+              }
+            })
+            .catch(err => {
+              this.$toast.error(err.response?.data?.messages.toString() || err.toString())
+            })
+        }
       },
       resetQuiz(){
         Object.assign(this.$data, this.$options.data());
