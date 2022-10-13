@@ -4,7 +4,7 @@
       <div class="control has-icons-left">
         <div class="input">
           <div class="tags">
-            <span v-for="t,i in tags" :key="t" class="tag is-success">
+            <span v-for="t,i in tags" :key="t" class="tag is-dark">
               {{ t }}
               <button class="delete is-small" @click="remove(i)"></button>
             </span>

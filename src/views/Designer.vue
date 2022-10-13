@@ -108,10 +108,10 @@
             </div>
             <template v-if="currentRoundType=='opendeur'">
               <div class="field">
-                <BulmaInput icon="image" placeholder="/media/opendeur/preview.jpg" v-model="quiz.rounds[currentRound].questions[index].preview" :required="true" @blur="autoAddMedia(index)" />
+                <BulmaInput icon="image" placeholder="/media/opendeur/preview.jpg" v-model="quiz.rounds[currentRound].questions[index].preview" :icon2="(!hasMediaPreview(index))?'triangle-exclamation':''" :required="true" @blur="autoAddMedia(index)" />
               </div>
               <div class="field">
-                <BulmaInput icon="image" placeholder="/media/opendeur/opendeur.mp4" v-model="quiz.rounds[currentRound].questions[index].media" :required="true" />
+                <BulmaInput icon="image" placeholder="/media/opendeur/opendeur.mp4" v-model="quiz.rounds[currentRound].questions[index].media" :icon2="(!hasMedia(index))?'triangle-exclamation':''" :required="true" />
               </div>
               <div class="control mt-2">
                 <BulmaButton v-if="question.preview!=''" icon="image" label="Toon preview" @click="currentQuestion=question;showMedia();mediatype='preview'" />
@@ -145,10 +145,10 @@
                     <BulmaInput :placeholder="'Antwoord ' + (index+1)" v-model="quiz.rounds[currentRound].questions[index].answers[index2].name" icon="thumbs-up" :required="true" />
                   </div>
                   <div class="column">
-                    <BulmaInput placeholder="/media/gallerij/uw_foto.jpg" v-model="quiz.rounds[currentRound].questions[index].answers[index2].media" icon="image" :required="true" />
+                    <BulmaInput placeholder="/media/gallerij/uw_foto.jpg" v-model="quiz.rounds[currentRound].questions[index].answers[index2].media" icon="image" :icon2="(!hasMediaGallery(index,index2))?'triangle-exclamation':''" :required="true" />
                   </div>
                   <div class="column">
-                    <BulmaInput v-if="answer.review!=undefined" placeholder="/media/gallerij/uw_foto_review.jpg" v-model="quiz.rounds[currentRound].questions[index].answers[index2].review" icon="image" :required="true" />
+                    <BulmaInput v-if="answer.review!=undefined" placeholder="/media/gallerij/uw_foto_review.jpg" v-model="quiz.rounds[currentRound].questions[index].answers[index2].review" icon="image" :icon2="(!hasMediaReview(index,index2))?'triangle-exclamation':''" :required="true" />
                   </div>
                 </div>
               </div>
@@ -161,20 +161,20 @@
                 <BulmaSwitch v-model="quiz.rounds[currentRound].questions[index].do" type="is-warning" label="Doe of gok vraag" />
               </div>
               <BulmaButton type="is-success"  v-if="question.media==undefined" @click="addMedia(index)" icon="image" label="Voeg media toe" />
-              <BulmaInput v-if="question.media!=undefined" placeholder="/media/369/uw_media.mp4" v-model="quiz.rounds[currentRound].questions[index].media" icon="image" :required="true" />
+              <BulmaInput v-if="question.media!=undefined" placeholder="/media/369/uw_media.mp4" v-model="quiz.rounds[currentRound].questions[index].media" icon="image" :icon2="(!hasMedia(index))?'triangle-exclamation':''" :required="true" />
               <div class="control mt-3" v-if="question.media!=undefined">
                 <BulmaRadio val="video" type="is-warning" v-model="quiz.rounds[currentRound].questions[index].mediatype" label="Filmpje" />
                 <BulmaRadio val="image" type="is-warning" v-model="quiz.rounds[currentRound].questions[index].mediatype" label="Foto" />
                 <BulmaRadio val="audio" type="is-warning" v-model="quiz.rounds[currentRound].questions[index].mediatype" label="Geluidsfragment" />
               </div>
               <div class="control mt-2" v-if="question.media!=undefined">
-                <BulmaButton @click="currentQuestion=question;showMedia();mediatype='player'" label="Speel media" icon="eye" />
-                <BulmaButton @click="removeMedia(index)" type="is-danger" label="Verwijder media" icon="times" />
+                  <BulmaButton @click="currentQuestion=question;showMedia();mediatype='player'" label="Speel media" icon="eye" />
+                  <BulmaButton @click="removeMedia(index)" type="is-danger" label="Verwijder media" icon="times" />
               </div>
             </template>
             <!-- media veld -->
             <div class="field" v-if="currentRoundType=='collectiefgeheugen'">
-              <BulmaInput :placeholder="'/media/'+currentRoundType+'/.mp4'" v-model="quiz.rounds[currentRound].questions[index].media" icon="film" :required="true" />
+              <BulmaInput :placeholder="'/media/'+currentRoundType+'/.mp4'" v-model="quiz.rounds[currentRound].questions[index].media" :icon2="(!hasMedia(index))?'triangle-exclamation':''"  icon="film" :required="true" />
             </div>
             <!-- knoppen -->
             <div class="control mt-2" v-if="currentRoundType=='collectiefgeheugen'">
@@ -189,19 +189,24 @@
                 </div>
               </div>
             </div>
-            <div v-if="tkn" class="control mt-2">
+            <div class="box mt-2 has-background-primary" v-if="tkn">
+              <p class="subtitle has-text-white is-size-6 mb-2">
+                <font-awesome-icon icon="database" class="mr-2" />
+                Database
+              </p>
               <BulmaTags
                 :autoComplete="tags"
                 v-model="quiz.rounds[currentRound].questions[index].tags"
                />
-              <!-- <BulmaInput :placeholder="'Tags'" v-model="quiz.rounds[currentRound].questions[index].tags" icon="tags" :required="false" /> -->
-              <BulmaInput :placeholder="'Help'" v-model="quiz.rounds[currentRound].questions[index].help" icon="circle-info" :required="false" />
-            </div>
-            <div v-if="tkn" class="control mt-2">
-              <!-- <text-reader label="Importeer een vraag..." @load="questionraw = $event;importQuestion(index)"></text-reader> -->
-              <BulmaButton icon="search" type="is-link" label="Zoek" @click="importQuestion2(index)" />
-              <BulmaButton icon="floppy-disk" type="is-link" label="Vraag Opslaan" @click="currentQuestion=question;exportQuestion()" />
-              <BulmaButton icon="magic" type="is-link" label="Verras me" @click="importQuestionRandom(index)" />
+              <div  class="control mt-2">
+                <BulmaInput :placeholder="'Help'" v-model="quiz.rounds[currentRound].questions[index].help" icon="circle-info" :required="false" />
+              </div>
+              <div class="control mt-2">
+                <!-- <text-reader label="Importeer een vraag..." @load="questionraw = $event;importQuestion(index)"></text-reader> -->
+                <BulmaButton icon="search" type="is-link" label="Zoek" @click="importQuestion2(index)" />
+                <BulmaButton icon="floppy-disk" type="is-link" label="Vraag Opslaan" @click="currentQuestion=question;exportQuestion()" />
+                <BulmaButton icon="magic" type="is-link" label="Verras me" @click="importQuestionRandom(index)" />
+              </div>
             </div>
           </div>
           <BulmaButton v-if="currentRoundType=='finale'" type="is-success" @click="addFinalQuestion()" icon="plus" label="Vraag toevoegen" />
@@ -1280,6 +1285,22 @@
         return {
           headers: { 'Authorization': 'Bearer ' + this.tkn }
         };
+      },
+      hasMedia(index){
+        const media = this.quiz.rounds[this.currentRound]?.questions[index]?.media
+        return media && Helpers.mediaExists(media)
+      },
+      hasMediaPreview(index){
+        const media = this.quiz.rounds[this.currentRound]?.questions[index]?.preview
+        return media && Helpers.mediaExists(media)
+      },
+      hasMediaGallery(index,index2){
+        const media = this.quiz.rounds[this.currentRound]?.questions[index]?.answers[index2]?.media
+        return media && Helpers.mediaExists(media)
+      },
+      hasMediaReview(index,index2){
+        const media = this.quiz.rounds[this.currentRound]?.questions[index]?.answers[index2]?.review
+        return media && Helpers.mediaExists(media)
       },
       exportQuestion(){
         // var filename = Helpers.fileNameSafeYaml(this.currentQuestion.name,this.currentRoundType)

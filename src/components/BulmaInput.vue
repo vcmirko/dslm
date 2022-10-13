@@ -1,5 +1,5 @@
 <template>
-  <div class="control has-icons-left">
+  <div class="control has-icons-left" :class="{'has-icons-right':icon2}">
     <input
       class="input"
       @keyup.enter="$emit('enterClicked')"
@@ -15,6 +15,9 @@
       :placeholder="placeholder">
     <span class="icon is-left">
       <font-awesome-icon :icon="icon" />
+    </span>
+    <span class="icon is-right has-text-danger" v-if="icon2">
+      <font-awesome-icon :icon="icon2" />
     </span>
   </div>
 </template>
@@ -40,6 +43,7 @@
       required:{type:Boolean,default:false},
       placeholder:{type:String,default:""},
       icon:{type:String,default:''},
+      icon2:{type:String,default:''},
       label:{type:String,default:""},
       hasError:{type:Boolean,default:false}
     },data(){

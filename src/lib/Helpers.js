@@ -1,5 +1,6 @@
 const Ajv = require('ajv');
 const AJVErrorParser = require('ajv-error-parser');
+const fs = require('fs')
 var Helpers=function(){
 
 };
@@ -234,6 +235,22 @@ Helpers.loadToken = function(){
     return undefined
   }
 }
+Helpers.mediaExists = function(url){
+
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.send();
+    request.onload = function() {
+      const status = request.status;
+      if (request.status == 200) //if(statusText == OK)
+      {
+        return true
+      } else {
+        return false
+      }
+    }
+
+}
 Helpers.loadQuiz = function(){
   var quiz
   try{
@@ -241,7 +258,7 @@ Helpers.loadQuiz = function(){
     quiz = JSON.parse(localStorage.dslmquiz)
     return quiz
   }catch(err){
-    console.log(err)
+    // console.log(err)
     return undefined
   }
 }
