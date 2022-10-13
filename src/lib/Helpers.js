@@ -217,9 +217,23 @@ Helpers.savePlay = function(play){
   }catch(e){
     return false
   }
-
+}
+Helpers.saveToken = function(token){
+  try{
+      localStorage.dslmtoken = token
+      return true
+  }catch(e){
+    return false
+  }
 }
 // loaders
+Helpers.loadToken = function(){
+  try{
+      return localStorage.dslmtoken
+  }catch(e){
+    return undefined
+  }
+}
 Helpers.loadQuiz = function(){
   var quiz
   try{
@@ -252,5 +266,8 @@ Helpers.shuffleArray = function(array) {
 }
 Helpers.fileNameSafeYaml = function(s,type){
   return type + "_" + s.replace(/[^a-z0-9]/gi, '_').toLowerCase()+".yaml";
+}
+Helpers.onlyUnique = function(value, index, self) {
+  return self.indexOf(value) === index;
 }
 export default Helpers

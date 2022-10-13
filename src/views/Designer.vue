@@ -1,5 +1,31 @@
 <template>
   <section class="section">
+    <div class="modal is-active" v-if="showTokenQuestion">
+      <div class="modal-background" @click="showTokenQuestion=false"></div>
+      <div class="modal-content">
+        <div class="modal-card">
+           <header class="modal-card-head">
+             <p class="modal-card-title">Jouw token</p>
+             <button class="delete" @click="showTokenQuestion=false" aria-label="close"></button>
+           </header>
+           <section class="modal-card-body">
+             <p class="has-text-weight-bold mb-2">
+               Geef je token voor de online database :
+             </p>
+             <p>
+               <BulmaInput icon="fingerprint" v-model="tkn" placeholder="vraag je token aan de auteur"  />
+             </p>
+           </section>
+           <footer class="modal-card-foot">
+             <BulmaButton @click="saveToken(tkn);showTokenQuestion=false;loadOnlineQuestions()" label="Token opslaan" type="is-success" icon="save" />
+             <BulmaButton @click="showTokenQuestion=false" label="Annuleren" type="is-danger" icon="cancel" />
+           </footer>
+         </div>
+
+
+      </div>
+      <button class="modal-close is-large" aria-label="close" @click="showTokenQuestion=false"></button>
+    </div>
     <div class="modal is-active" v-if="showQuestionImport">
       <div class="modal-background" @click="showQuestionImport=false"></div>
       <div class="modal-content">
@@ -52,7 +78,9 @@
         <BulmaButton type="is-warning" icon="redo" label="Reset Quiz" @click="resetQuiz()" />
         <BulmaButton type="is-info" icon="file-export" label="Exporteer Quiz" @click="exportQuiz()" />
         <BulmaButton type="is-success" icon="save" label="Quiz opladen voor spel" @click="saveQuiz()" />
-        <BulmaButton type="is-link" icon="refresh" label="Herlaad online vragen" @click="loadOnlineQuestions()" />
+        <BulmaButton type="is-link" icon="refresh" v-if="tkn" label="Herlaad online vragen" @click="loadOnlineQuestions()" />
+        <BulmaButton type="is-link" icon="fingerprint" label="Wijzig token" @click="showTokenQuestion=true" />
+        <BulmaButton type="is-link" icon="magic" v-if="tkn" label="Random Ronde" @click="importRoundRandom" />
         <!-- round nav -->
         <div class="tabs">
           <ul>
@@ -161,11 +189,15 @@
                 </div>
               </div>
             </div>
-            <div class="control mt-2">
-              <BulmaInput :placeholder="'Tags'" v-model="quiz.rounds[currentRound].questions[index].tags" icon="tags" :required="false" />
+            <div v-if="tkn" class="control mt-2">
+              <BulmaTags
+                :autoComplete="tags"
+                v-model="quiz.rounds[currentRound].questions[index].tags"
+               />
+              <!-- <BulmaInput :placeholder="'Tags'" v-model="quiz.rounds[currentRound].questions[index].tags" icon="tags" :required="false" /> -->
               <BulmaInput :placeholder="'Help'" v-model="quiz.rounds[currentRound].questions[index].help" icon="circle-info" :required="false" />
             </div>
-            <div class="control mt-2">
+            <div v-if="tkn" class="control mt-2">
               <!-- <text-reader label="Importeer een vraag..." @load="questionraw = $event;importQuestion(index)"></text-reader> -->
               <BulmaButton icon="search" type="is-link" label="Zoek" @click="importQuestion2(index)" />
               <BulmaButton icon="floppy-disk" type="is-link" label="Vraag Opslaan" @click="currentQuestion=question;exportQuestion()" />
@@ -213,18 +245,21 @@
   import TextReader from "./../components/TextReader.vue"
   import BulmaInput from "./../components/BulmaInput.vue"
   import BulmaButton from "./../components/BulmaButton.vue"
+  import BulmaTags from "./../components/BulmaTags.vue"
   import BulmaSwitch from "./../components/BulmaSwitch.vue"
   import MediaPreview from './../components/MediaPreview.vue'
   import BulmaRadio from "./../components/BulmaRadio.vue"
   import download from 'downloadjs'
   export default{
     name: "Designer",
-    components:{VueCodeEditor,TextReader,MediaPreview,BulmaInput,BulmaButton,BulmaSwitch,BulmaRadio},
+    components:{VueCodeEditor,TextReader,MediaPreview,BulmaInput,BulmaButton,BulmaSwitch,BulmaRadio,BulmaTags},
     data(){
       return  {
         quizraw:"",
         questionraw:"",
+        newTags:undefined,
         showQuestionImport:false,
+        showTokenQuestion:false,
         filters:{
           name:"",
           tags:"",
@@ -233,7 +268,7 @@
           email:""
         },
         onlineQuestions:[],
-        tkn:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1pcmtvQHZhbmNvbGVuLmNvbSIsImlhdCI6MTY2NTQ5ODkyOSwiZXhwIjoxOTI0Njk4OTI5fQ.NWE7gmWBO-McOr7AGeumdpz5tELljDw-s08sDzeenY8",
+        tkn:"",
         quiz:{
           rounds: [
             {
@@ -1041,12 +1076,30 @@
           if(this.filters.do && !x.do) return false
           return true
         })
+      },
+      tags(){
+          return this.onlineQuestions.reduce(
+            (prev,cur)=>{
+              if(cur.tags){
+                return [...prev,...cur.tags.toLowerCase().split(",")]
+              }else{
+                return prev
+              }
+            },
+            []
+          ).filter(Helpers.onlyUnique)
       }
     },
     methods:{
       loadAll(){
         this.loadDslm()
-        this.loadOnlineQuestions()
+        this.loadToken()
+        if(!this.tkn){
+          this.showTokenQuestion=true
+        }else{
+          this.loadOnlineQuestions()
+        }
+
       },
       loadDslm(){
         this.quiz = Helpers.loadQuiz()
@@ -1082,6 +1135,15 @@
       },
       removeFinalQuestion(index){
         this.quiz.rounds[this.currentRound].questions.splice(index,1)
+      },
+      saveToken(){
+        Helpers.saveToken(this.tkn)
+      },
+      loadToken(){
+        this.tkn=Helpers.loadToken()
+        if(!this.tkn){
+          this.$toast.warning("Geen token gevonden")
+        }
       },
       showMedia(){
         this.previewMedia=true;
@@ -1178,18 +1240,19 @@
           headers: { 'Authorization': 'Bearer ' + this.tkn }
         };
       },
-      loadOnlineQuestions(){
-        axios
-          .get("https://dslm.vancolen.com/api/v1/dslm?type="+this.currentRoundType,this.getAuth())
-          .then(response => {
-            if(response.data){
-              this.$toast.success("Online vragen zijn geladen")
-              this.onlineQuestions=response.data.vragen
-            }
-          })
-          .catch(err => {
-            this.$toast.error(err.response?.data?.messages.toString() || err.toString())
-          })
+      loadOnlineQuestions(noAlert){
+        if(this.tkn)
+          axios
+            .get("https://dslm.vancolen.com/api/v1/dslm?type="+this.currentRoundType,this.getAuth())
+            .then(response => {
+              if(response.data){
+                if(!noAlert) this.$toast.success("Online vragen zijn geladen")
+                this.onlineQuestions=response.data.vragen
+              }
+            })
+            .catch(err => {
+              this.$toast.error(err.response?.data?.messages.toString() || err.toString())
+            })
       },
       importQuestion2(index){
         this.currentQuestionIndex=index
@@ -1201,8 +1264,16 @@
         var randomitem = this.onlineQuestions[Math.floor(Math.random()*this.onlineQuestions.length)];
         this.loadQuestion(randomitem)
       },
+      importRoundRandom(){
+        var tempIndex = this.currentQuestionIndex
+        for (let i = 0; i < this.quiz.rounds[this.currentRound].questions.length; i++) {
+          this.importQuestionRandom(i)
+        }
+        this.currentQuestionIndex=tempIndex
+
+      },
       loadQuestion(q){
-        Vue.set(this.quiz.rounds[this.currentRound].questions,this.currentQuestionIndex,q)
+        Vue.set(this.quiz.rounds[this.currentRound].questions,this.currentQuestionIndex,JSON.parse(JSON.stringify(q)))
         this.showQuestionImport=false
       },
       getAuth() {
@@ -1220,6 +1291,7 @@
             .then(response => {
               if(response.data.succes){
                 this.$toast.success("Aangepast")
+                this.loadOnlineQuestions(true)
               }
             })
             .catch(err => {
@@ -1231,6 +1303,7 @@
             .then(response => {
               if(response.data.succes){
                 this.$toast.success("Opgeslagen")
+                this.loadOnlineQuestions(true)
               }
             })
             .catch(err => {
@@ -1241,6 +1314,8 @@
       },
       resetQuiz(){
         Object.assign(this.$data, this.$options.data());
+        this.loadToken()
+        this.loadOnlineQuestions(true)
       },
       saveQuiz() {
        var validation = Helpers.validateQuiz(this.quiz)
