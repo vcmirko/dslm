@@ -140,6 +140,9 @@
                 <BulmaButton type="has-text-success" icon="arrow-down" iconOnly @click.stop="move(index,1)" />
                 <BulmaButton type="has-text-primary" icon="arrow-up" iconOnly @click.stop="move(index,-1)" />
                 <BulmaButton type="has-text-info" icon="redo" iconOnly @click.stop="resetQuestion(index)" />
+                <span class="is-pulled-right">
+                <DragTarget @import="importFiles" v-if="currentRoundType=='gallerij'" :index="index" />
+                </span>
                 <BulmaButton v-if="currentRoundType=='finale'" type="has-text-danger ml-5" icon="times" iconOnly @click="removeFinalQuestion(index)" />
                 <BulmaButton v-if="currentRoundType=='finale'" type="has-text-success" icon="plus" iconOnly @click="addFinalQuestion(index)" />
               </label>
@@ -294,10 +297,12 @@
   import BulmaSwitch from "./../components/BulmaSwitch.vue"
   import MediaPreview from './../components/MediaPreview.vue'
   import BulmaRadio from "./../components/BulmaRadio.vue"
+  import DragTarget from "./../components/DragTarget.vue"
+  import path from 'path'
   import download from 'downloadjs'
   export default{
     name: "Designer",
-    components:{VueCodeEditor,TextReader,MediaPreview,BulmaInput,BulmaButton,BulmaSwitch,BulmaRadio,BulmaTags},
+    components:{VueCodeEditor,TextReader,MediaPreview,BulmaInput,BulmaButton,BulmaSwitch,BulmaRadio,BulmaTags,DragTarget},
     data(){
       return  {
         quizraw:"",
@@ -1186,6 +1191,35 @@
       }
     },
     methods:{
+      importFiles(o){
+        const files=o.files
+        const index=o.index
+        String.prototype.toProperCase = function () {
+            return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+        };
+        if(this.currentRoundType=="gallerij"){
+          files.forEach((f)=>{
+            if(!f.includes("_review")){
+              const base = path.basename(f,path.extname(f))
+              const ext = path.extname(f)
+              const review = `${base}_review${ext}`
+              const antwoord = path.basename(f,ext).replaceAll("_"," ").toProperCase()
+              for(let i=0;i<this.quiz.rounds[this.currentRound].questions[index].answers.length;i++){
+                const a = this.quiz.rounds[this.currentRound].questions[index].answers[i]
+                if(!a.name || !a.media){
+                  const folder = this.quiz.rounds[this.currentRound].questions[index].name?.replaceAll(" ","_")
+                  Vue.set(this.quiz.rounds[this.currentRound].questions[index].answers[i],'name',antwoord)
+                  Vue.set(this.quiz.rounds[this.currentRound].questions[index].answers[i],'media',path.join('/media/gallerij',folder,f))
+                  if(files.includes(review)){
+                    Vue.set(this.quiz.rounds[this.currentRound].questions[index].answers[i],'review',path.join('/media/gallerij',folder,review))
+                  }
+                  break;
+                }
+              }
+            }
+          })
+        }
+      },
       loadAll(){
         this.loadDslm()
         this.loadToken()
