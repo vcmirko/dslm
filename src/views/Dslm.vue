@@ -1,6 +1,6 @@
 <template>
   <div>
-    <fullscreen v-model="fullscreen" v-if="isLoaded && !showChangeScore && !showChangeName">
+    <fullscreen v-model="fullscreen" v-if="isLoaded && !showChangeScore">
 
       <div :class="{'has-background-dslm':view && fullscreen}">
         <section class="dslm section">
@@ -61,11 +61,8 @@
             <a class="navbar-item" v-if="!view" :class="{'is-disabled':!(play.round.current<(quiz.rounds.length-1) && !play.complete)}" @click="nextRound(true)">
               <span class="icon"><font-awesome-icon icon="arrow-right" /></span>
             </a>
-            <a class="navbar-item" v-if="!view" @click="showChangeScore=true">
-              <span class="icon"><font-awesome-icon icon="undo-alt" /></span><span>Scores</span>
-            </a>
-            <a class="navbar-item" v-if="!view" @click="showChangeName=true">
-              <span class="icon"><font-awesome-icon icon="user" /></span><span>Gebruikers</span>
+            <a class="navbar-item" v-if="!view &! play.round.started" @click="showChangeScore=true">
+              <span class="icon"><font-awesome-icon icon="undo-alt" /></span><span>Wijzig</span>
             </a>
             <router-link v-if="!view" class="navbar-item" to="/view" target="_blank">
               <span class="icon"><font-awesome-icon icon="eye" /></span><span>Deelnemers scherm</span>
@@ -91,30 +88,25 @@
     <div v-if="isLoaded && showChangeScore">
       <div class="box darkbg has-text-centered">
         <div class="notification is-warning is-inline-block" width="400px">
-          <h2 class="is-family-secondary is-size-3 mb-2">Scores</h2>
-          <div class="field" v-for="player,index in play.players" :key="'player'+index">
+          <h2 class="is-family-secondary is-size-3 mb-2">Namen &amp; Scores</h2>
+          <div v-for="player,index in play.players" :key="'player'+index">
             <label class="label">Speler {{(index+1)}}</label>
-            <p class="control">
-              <input class="input" type="number" @change="savePlay()" v-model.number="play.players[index].score">
-            </p>
+            <div class="field">
+              <p class="control has-icons-left">
+                <input class="input" type="text" @change="savePlay()" v-model="play.players[index].name">
+                <span class="icon is-small is-left">
+                  <font-awesome-icon icon="user" />
+                </span>
+              </p>
+              <p class="control has-icons-left mt-1">
+                <input class="input" type="number" @change="savePlay()" v-model.number="play.players[index].score">
+                <span class="icon is-small is-left">
+                  <font-awesome-icon icon="arrow-up-9-1" />
+                </span>
+              </p>
+            </div>
           </div>
           <button class="button is-success mt-5" @click="showChangeScore=false">
-            <span class="icon"><font-awesome-icon icon="times" /></span><span>Close</span>
-          </button>
-        </div>
-      </div>
-    </div>
-    <div v-if="isLoaded && showChangeName">
-      <div class="box darkbg has-text-centered">
-        <div class="notification is-warning is-inline-block" width="400px">
-          <h2 class="is-family-secondary is-size-3 mb-2">Namen</h2>
-          <div class="field" v-for="player,index in play.players" :key="'player'+index">
-            <label class="label">Speler {{(index+1)}}</label>
-            <p class="control">
-              <input class="input" type="text" @change="savePlay()" v-model.number="play.players[index].name">
-            </p>
-          </div>
-          <button class="button is-success mt-5" @click="showChangeName=false">
             <span class="icon"><font-awesome-icon icon="times" /></span><span>Close</span>
           </button>
         </div>
@@ -150,8 +142,7 @@
         clock:undefined,
         fullscreen: false,
         clockAudio:undefined,
-        showChangeScore:false,
-        showChangeName:false
+        showChangeScore:false
       }
     },
     computed: {
@@ -194,7 +185,6 @@
       }
     },
     methods: {
-
         toggleFullscreen () { this.fullscreen = !this.fullscreen },
         toggleFinalAnswers() {
           this.play.showFinalAnswers=!this.play.showFinalAnswers

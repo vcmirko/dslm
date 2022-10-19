@@ -52,7 +52,7 @@
   import Score from './Score.vue'
   import Answers from './Answers.vue'
   import Media from './Media.vue'
-  import Keypress from 'vue-keypress'
+  import Keypress from './VueKeyPress.vue'
   export default{
     name:"CollectiefGeheugen",
     components:{Score,Media,Answers,Keypress},

@@ -28,7 +28,7 @@
               <span class="icon is-size-3"><font-awesome-icon icon="circle-info" /></span>
               <span class="is-size-4">{{ question.help}}</span>
             </span>
-          </p>          
+          </p>
         </div>
       </div>
     </template>
@@ -51,7 +51,7 @@
   import Score from './Score.vue'
   import Answers from './Answers.vue'
   import Media from './Media.vue'
-  import Keypress from 'vue-keypress'
+  import Keypress from './VueKeyPress.vue'
   export default{
     name:"Finale",
     components:{Score,Answers,Keypress},

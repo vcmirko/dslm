@@ -48,7 +48,7 @@
   import Helpers from '../lib/Helpers'
   import Score from './Score.vue'
   import Answers from './Answers.vue'
-  import Keypress from 'vue-keypress'
+  import Keypress from './VueKeyPress.vue'
   export default{
     name:"Puzzel",
     components:{Score,Answers,Keypress},

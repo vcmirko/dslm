@@ -33,13 +33,14 @@
 					"description",
 					"questions"
 				],
-        "additionalProperties": false,
+        "additionalProperties": true,
 				"properties": {
 					"name": {
 						"$id": "/name",
 						"title": "Name",
 						"type": "string",
 						"default": "",
+						"tags": "",
 						"pattern": "^.*$"
 					},
 					"type": {

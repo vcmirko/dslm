@@ -21,7 +21,7 @@
 <script>
   import Vue from 'vue'
   import Helpers from '../lib/Helpers'
-  import Keypress from 'vue-keypress'
+  import Keypress from './VueKeyPress.vue'
   export default{
     name:"Answers",
     components:{Keypress},

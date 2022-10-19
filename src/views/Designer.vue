@@ -1,5 +1,26 @@
 <template>
   <section class="section">
+    <div class="modal is-active" v-if="showDeleteQuiz">
+      <div class="modal-background" @click="showDeleteQuiz=false"></div>
+      <div class="modal-content">
+        <div class="modal-card">
+           <header class="modal-card-head">
+             <p class="modal-card-title">Ben je zeker ?</p>
+             <button class="delete" @click="showDeleteQuiz=false;showQuizImport=true" aria-label="close"></button>
+           </header>
+           <section class="modal-card-body">
+             <p class="has-text-weight-bold mb-2">
+               Ben je zeker ?
+             </p>
+           </section>
+           <footer class="modal-card-foot">
+             <BulmaButton @click="deleteOnlineQuiz();showDeleteQuiz=false;showQuizImport=true" label="Verwijderen" type="is-success" icon="trash" />
+             <BulmaButton @click="showDeleteQuiz=false;showQuizImport=true" label="Annuleren" type="is-danger" icon="cancel" />
+           </footer>
+         </div>
+      </div>
+      <button class="modal-close is-large" aria-label="close" @click="showTokenQuestion=false"></button>
+    </div>
     <div class="modal is-active" v-if="showTokenQuestion">
       <div class="modal-background" @click="showTokenQuestion=false"></div>
       <div class="modal-content">
@@ -65,6 +86,7 @@
         <table class="table is-bordered is-striped">
           <thead class="has-background-primary">
             <tr>
+              <th class="is-medium"></th>
               <th class="has-text-white">Quiz</th>
               <th class="has-text-white is-medium" title="Tags"><font-awesome-icon icon="tags" /></th>
               <th class="has-text-white is-medium" title="Gebruiker"><font-awesome-icon icon="user" /></th>
@@ -72,13 +94,19 @@
           </thead>
           <thead>
             <tr>
+              <th class="is-medium"></th>
               <th><BulmaInput icon="filter" v-model="filters.name" /></th>
               <th class="is-medium"><BulmaInput icon="filter" v-model="filters.tags" /></th>
               <th class="is-medium"><BulmaInput icon="filter" v-model="filters.email" /></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="q in onlineQuizFiltered" :key="q.id" class="is-clickable" @click="loadOnlineQuiz(q)">
+            <tr v-for="q in onlineQuizFiltered" :key="q.id">
+              <td class="is-medium">
+                <span class="icon"><font-awesome-icon icon="file-import" class="is-clickable has-text-info" @click="loadOnlineQuiz(q)" /></span>
+                <span class="icon"><font-awesome-icon icon="copy" class="is-clickable has-text-warning" @click="loadOnlineQuiz(q,true)" /></span>
+                <span class="icon"><font-awesome-icon icon="trash" class="is-clickable has-text-danger" @click="showQuizImport=false;currentQuizId=q.id;showDeleteQuiz=true" /></span>
+              </td>
               <td class="ellipsis" :title="q.name">{{ q.name }}</td>
               <td :title="q.tags" class="is-medium ellipsis">{{ q.tags }}</td>
               <td class="is-medium ellipsis has-text-centered">{{ q.email }}</td>
@@ -114,8 +142,9 @@
           />
         </div>
         <BulmaButton type="is-warning" icon="redo" label="Reset" @click="resetQuiz()" />
-        <BulmaButton type="is-info" icon="upload" v-if="quiz.name && tkn" label="Export" @click="exportOnlineQuiz()" />
-        <BulmaButton type="is-info" icon="file-export" v-if="quiz.name && !tkn" label="Export" @click="exportQuiz()" />
+        <BulmaButton type="is-info" icon="upload" v-if="quiz.name && tkn" label="Opslaan" @click="exportOnlineQuiz()" />
+        <BulmaButton type="is-info" icon="upload" v-if="quiz.name && tkn" label="Opslaan als nieuw" @click="quiz.id=undefinded;exportOnlineQuiz()" />
+        <BulmaButton type="is-info" icon="file-export" v-if="quiz.name && !tkn" label="Export naar bestand" @click="exportQuiz()" />
         <BulmaButton type="is-success" icon="save" label="Opladen voor spel" @click="saveQuiz()" />
         <BulmaButton type="is-link" icon="refresh" v-if="tkn" label="Herlaad online vragen" @click="loadOnlineQuestions()" />
         <BulmaButton type="is-link" icon="magic" v-if="tkn" label="Random Ronde" @click="importRoundRandom" />
@@ -311,6 +340,7 @@
         showQuestionImport:false,
         showQuizImport:false,
         showTokenQuestion:false,
+        showDeleteQuiz:false,
         filters:{
           name:"",
           tags:"",
@@ -323,6 +353,7 @@
         tkn:"",
         quiz:{
           name: "",
+          tags: "",
           rounds: [
             {
               name: "3-6-9",
@@ -332,62 +363,74 @@
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 },
                 {
                   name: "",
                   answer: "",
-                  tags:""
+                  tags:"",
+                  help:""
                 }
               ]
             },
@@ -399,6 +442,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   preview: "/media/opendeur/vraag1.jpg",
                   media: "",
                   answers: [
@@ -419,6 +463,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   preview: "/media/opendeur/vraag2.jpg",
                   media: "",
                   answers: [
@@ -439,6 +484,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   preview: "/media/opendeur/vraag3.jpg",
                   media: "",
                   answers: [
@@ -459,6 +505,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   preview: "/media/opendeur/vraag4.jpg",
                   media: "",
                   answers: [
@@ -480,12 +527,13 @@
             },
             {
               name: "Puzzel",
-              tags:"",
               type: "puzzel",
               description: "Er moeten 3 verbanden worden gezochten tussen de termen die je zo meteen ziet verschijnen, soms moeilijk, maar het goeie nieuws: elk juist antwoord levert 30 seconden op.",
               questions: [
                 {
                   name: "Puzzel1",
+                  tags:"",
+                  help:"",
                   words: {
                     w11: "",
                     w12: "",
@@ -515,6 +563,7 @@
                 {
                   name: "Puzzel2",
                   tags:"",
+                  help:"",
                   words: {
                     w11: "",
                     w12: "",
@@ -544,6 +593,7 @@
                 {
                   name: "Puzzel3",
                   tags:"",
+                  help:"",
                   words: {
                     w11: "",
                     w12: "",
@@ -573,6 +623,7 @@
                 {
                   name: "Puzzel4",
                   tags:"",
+                  help:"",
                   words: {
                     w11: "",
                     w12: "",
@@ -603,12 +654,13 @@
             },
             {
               name: "Gallerij",
-              tags:"",
               type: "gallerij",
               description: "In deze ronde zien we een marathon aan foto’s voorbij flitsen en de opdracht is simpel: zeggen wie of wat je ziet. Elk juist antwoord levert 15 seconden op.",
               questions: [
                 {
                   name: "Gallerij1",
+                  tags:"",
+                  help:"",
                   answers: [
                     {
                       media: "",
@@ -655,6 +707,7 @@
                 {
                   name: "Gallerij2",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       media: "",
@@ -701,6 +754,7 @@
                 {
                   name: "Gallerij3",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       media: "",
@@ -747,6 +801,7 @@
                 {
                   name: "Gallerij4",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       media: "",
@@ -800,6 +855,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   media: "",
                   answers: [
                     {
@@ -822,6 +878,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   media: "",
                   answers: [
                     {
@@ -844,6 +901,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   media: "",
                   answers: [
                     {
@@ -866,6 +924,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   media: "",
                   answers: [
                     {
@@ -895,6 +954,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -916,6 +976,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -937,6 +998,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -958,6 +1020,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -979,6 +1042,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -1000,6 +1064,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -1021,6 +1086,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -1042,6 +1108,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -1063,6 +1130,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -1084,6 +1152,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -1105,6 +1174,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -1126,6 +1196,7 @@
                 {
                   name: "",
                   tags:"",
+                  help:"",
                   answers: [
                     {
                       name: ""
@@ -1150,6 +1221,7 @@
         },
         currentRound:0,
         currentRoundType:'369',
+        currentQuizId:undefined,
         previewMedia:false,
         currentQuestion:undefined,
         currentQuestionIndex:0,
@@ -1248,6 +1320,8 @@
       addFinalQuestion(index=undefined){
         var newquestion={
           name:undefined,
+          tags:"",
+          help:"",
           answers:[
             {name:undefined},
             {name:undefined},
@@ -1417,10 +1491,20 @@
       },
       loadOnlineQuestion(q){
         Vue.set(this.quiz.rounds[this.currentRound].questions,this.currentQuestionIndex,JSON.parse(JSON.stringify(q)))
+        if(!this.quiz.rounds[this.currentRound].questions[this.currentQuestionIndex].tags){
+          this.quiz.rounds[this.currentRound].questions[this.currentQuestionIndex].tags=""
+        }
+        if(!this.quiz.rounds[this.currentRound].questions[this.currentQuestionIndex].help){
+          this.quiz.rounds[this.currentRound].questions[this.currentQuestionIndex].help=""
+        }
         this.showQuestionImport=false
       },
-      loadOnlineQuiz(q){
+      loadOnlineQuiz(q,clone=false){
         Vue.set(this,'quiz',JSON.parse(JSON.stringify(q)))
+        if(clone){
+          Vue.set(this.quiz,"id",undefined)
+          Vue.set(this.quiz,"name",this.quiz.name + " Kopie")
+        }
         this.showQuizImport=false
       },
       getAuth() {
@@ -1460,7 +1544,7 @@
         Vue.set(this.quiz,"type","quiz")
         if(this.quiz?.id){
           axios
-            .put("https://dslm.vancolen.com/api/v1/dslm/"+this.quiz.id,this.currentQuestion,this.getAuth())
+            .put("https://dslm.vancolen.com/api/v1/dslm/"+this.quiz.id,this.quiz,this.getAuth())
             .then(response => {
               if(response.data.succes){
                 this.$toast.success("Aangepast")
@@ -1468,7 +1552,8 @@
               }
             })
             .catch(err => {
-              this.$toast.error(err.response?.data?.messages.toString() || err.toString())
+              var error = (err.response?.data?.messages.toString() || err.toString()).replace('Vraag','Quiz')
+              this.$toast.error(error)
             })
         }else{
           axios
@@ -1480,7 +1565,29 @@
               }
             })
             .catch(err => {
+              var error = (err.response?.data?.messages.toString() || err.toString()).replace('Vraag','Quiz')
+              this.$toast.error(error)
+            })
+        }
+      },
+      deleteOnlineQuiz(){
+        Vue.set(this.quiz,"type","quiz")
+        if(this.currentQuizId){
+          axios
+            .delete("https://dslm.vancolen.com/api/v1/dslm/"+this.currentQuizId,this.getAuth())
+            .then(response => {
+              if(response.data.succes){
+                this.$toast.success("Quiz gewist")
+                this.loadOnlineQuizes(true)
+                if(this.quiz.id==this.currentQuizId){
+                  this.quiz.id=undefined
+                }
+                this.currentQuizId=undefined
+              }
+            })
+            .catch(err => {
               this.$toast.error(err.response?.data?.messages.toString() || err.toString())
+              this.currentQuizId=undefined
             })
         }
       },
